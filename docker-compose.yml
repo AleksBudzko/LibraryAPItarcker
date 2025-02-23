@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: booktracker
+      POSTGRES_USER: trackeruser
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5432:5432"
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "9092:9092"
+
+  book-storage-service:
+    build: ./book-storage-service
+    container_name: book-storage-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstorage
+      SPRING_DATASOURCE_USERNAME: bookuser
+      SPRING_DATASOURCE_PASSWORD: 123
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - kafka
+
+  book-tracker-service:
+    build: ./book-tracker-service
+    container_name: book-tracker-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/booktracker
+      SPRING_DATASOURCE_USERNAME: trackeruser
+      SPRING_DATASOURCE_PASSWORD: 123
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - kafka

@@ -6,5 +6,5 @@ import org.springframework.kafka.annotation.EnableKafka;
 @Configuration
 @EnableKafka
 public class KafkaConfig {
-    // Дополнительная конфигурация Kafka (если требуется) настраивается через application.properties или application.yml
+    // Дополнительная конфигурация Kafka (если требуется) настраивается через application.properties или application.docker-compose.yml
 }

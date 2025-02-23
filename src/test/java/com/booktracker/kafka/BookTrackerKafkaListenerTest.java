@@ -3,13 +3,13 @@ package com.booktracker.kafka;
 import com.booktracker.service.BookTrackerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(MockitoExtension.class)
 public class BookTrackerKafkaListenerTest {
 
     @Mock
@@ -19,19 +19,18 @@ public class BookTrackerKafkaListenerTest {
     private BookTrackerKafkaListener listener;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
     }
 
     @Test
-    public void testHandleBookCreated() {
+    void testHandleBookCreated() {
         Long bookId = 100L;
         listener.handleBookCreated(bookId);
         verify(service, times(1)).createRecord(bookId);
     }
 
     @Test
-    public void testHandleBookDeleted() {
+    void testHandleBookDeleted() {
         Long bookId = 100L;
         listener.handleBookDeleted(bookId);
         verify(service, times(1)).deleteRecordByBookId(bookId);
