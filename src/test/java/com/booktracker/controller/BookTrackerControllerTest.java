@@ -4,32 +4,37 @@ import com.booktracker.model.BookTracker;
 import com.booktracker.model.BookStatus;
 import com.booktracker.service.BookTrackerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doNothing;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(com.booktracker.controller.BookTrackerController.class)
-public class BookTrackerControllerTest  {
+class BookTrackerControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private BookTrackerService bookTrackerService;
 
-    @Autowired
+    @InjectMocks
+    private BookTrackerController bookTrackerController;
+
+    private MockMvc mockMvc;
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(bookTrackerController).build();
+        objectMapper = new ObjectMapper();
+    }
 
     @Test
     void testCreateRecord() throws Exception {
@@ -57,7 +62,8 @@ public class BookTrackerControllerTest  {
                 .build();
         when(bookTrackerService.getFreeBooks()).thenReturn(Collections.singletonList(tracker));
 
-        mockMvc.perform(get("/tracker/books/free"))
+        mockMvc.perform(get("/tracker/books/free")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].bookId").value(100L))
                 .andExpect(jsonPath("$[0].status").value("FREE"));
@@ -93,7 +99,9 @@ public class BookTrackerControllerTest  {
     void testDeleteRecord() throws Exception {
         Long id = 1L;
         doNothing().when(bookTrackerService).deleteRecord(id);
-        mockMvc.perform(delete("/tracker/books/{id}", id))
+
+        mockMvc.perform(delete("/tracker/books/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 }
